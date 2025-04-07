@@ -1,8 +1,6 @@
-﻿using CsvHelper;
-using System.Globalization;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.Globalization;
+using BMT.Data.Models;
+using CsvHelper;
 
 var foodFile = "food.csv";
 var brandedFile = "branded_food.csv";
@@ -25,7 +23,7 @@ using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
 
         foodList[fdcId] = new Food
         {
-            FoodId = fdcId,
+            Id = fdcId,
             Name = name
         };
     }
@@ -70,10 +68,10 @@ var nutrientMap = new Dictionary<int, Action<Food, float>> {
     { 1092, (f,v) => f.PotassiumMg = v },
     { 1087, (f,v) => f.CalciumMg = v },
     { 1089, (f,v) => f.IronMg = v },
-    { 1106, (f,v) => f.VitaminA_µg = v },
-    { 1162, (f,v) => f.VitaminC_Mg = v },
-    { 1114, (f,v) => f.VitaminD_µg = v },
-    { 1178, (f,v) => f.VitaminB12_µg = v },
+    { 1106, (f,v) => f.VitaminAµg = v },
+    { 1162, (f,v) => f.VitaminCMg = v },
+    { 1114, (f,v) => f.VitaminDµg = v },
+    { 1178, (f,v) => f.VitaminB12µg = v },
     { 304,  (f,v) => f.MagnesiumMg = v },
     { 1095, (f,v) => f.ZincMg = v }
 };
@@ -99,5 +97,5 @@ using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
 // Now foodList.Values contains all enriched Food entries
 foreach (var food in foodList.Values)
 {
-    Console.WriteLine($"{food.FoodId}, {food.Name}, {food.Brand}, Calories: {food.Calories}");
+    Console.WriteLine($"{food.Id}, {food.Name}, {food.Brand}, Calories: {food.Calories}");
 }
