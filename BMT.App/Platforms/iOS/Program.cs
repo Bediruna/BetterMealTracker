@@ -1,7 +1,7 @@
 ﻿using ObjCRuntime;
 using UIKit;
 
-namespace BetterMealTracker
+namespace BMT.App
 {
     public class Program
     {

@@ -2,7 +2,7 @@ using System;
 using Microsoft.Maui;
 using Microsoft.Maui.Hosting;
 
-namespace BetterMealTracker
+namespace BMT.App
 {
     internal class Program : MauiApplication
     {

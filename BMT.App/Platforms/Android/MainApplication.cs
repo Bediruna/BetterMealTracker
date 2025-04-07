@@ -1,7 +1,7 @@
 ﻿using Android.App;
 using Android.Runtime;
 
-namespace BetterMealTracker
+namespace BMT.App
 {
     [Application]
     public class MainApplication : MauiApplication

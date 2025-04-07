@@ -1,4 +1,4 @@
-﻿namespace BetterMealTracker
+﻿namespace BMT.App
 {
     public partial class MainPage : ContentPage
     {

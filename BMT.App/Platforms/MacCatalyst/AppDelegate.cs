@@ -1,6 +1,6 @@
 ﻿using Foundation;
 
-namespace BetterMealTracker
+namespace BMT.App
 {
     [Register("AppDelegate")]
     public class AppDelegate : MauiUIApplicationDelegate

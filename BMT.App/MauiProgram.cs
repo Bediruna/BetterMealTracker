@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace BetterMealTracker
+namespace BMT.App
 {
     public static class MauiProgram
     {

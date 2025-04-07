@@ -1,4 +1,4 @@
-﻿namespace BetterMealTracker
+﻿namespace BMT.App
 {
     public partial class App : Application
     {
@@ -9,7 +9,7 @@
 
         protected override Window CreateWindow(IActivationState? activationState)
         {
-            return new Window(new MainPage()) { Title = "BetterMealTracker" };
+            return new Window(new MainPage()) { Title = "BMT.App" };
         }
     }
 }
