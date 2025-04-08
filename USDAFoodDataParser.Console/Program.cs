@@ -3,64 +3,78 @@ using System.Text.RegularExpressions;
 using CsvHelper;
 using Npgsql;
 
-var directoryPath = @"C:\Users\bedir\Downloads\FoodData";
-string connString = Environment.GetEnvironmentVariable("PG_TEST_CONN_STRING")
-                    ?? throw new InvalidOperationException("PG_TEST_CONN_STRING not set");
-
-using var conn = new NpgsqlConnection(connString);
-await conn.OpenAsync();
-
-var csvFiles = Directory.GetFiles(directoryPath, "*.csv");
-
-foreach (var filePath in csvFiles)
+namespace FoodDataImporter
 {
-    var tableName = Path.GetFileNameWithoutExtension(filePath).ToLowerInvariant();
-
-    // Read headers first
-    string[] headers;
-    using (var headerReader = new StreamReader(filePath))
-    using (var csv = new CsvReader(headerReader, CultureInfo.InvariantCulture))
+    public class Program
     {
-        await csv.ReadAsync();
-        csv.ReadHeader();
-        headers = csv.HeaderRecord!;
-    }
+        private static readonly string DirectoryPath = @"C:\Users\bedir\Downloads\FoodData";
+        private static readonly string ConnectionString =
+            Environment.GetEnvironmentVariable("PG_usdafooddata_CONN_STRING")
+            ?? throw new InvalidOperationException("PG_usdafooddata_CONN_STRING not set");
 
-    var sanitizedHeaders = headers.Select(Sanitize).ToArray();
-
-    // Create table if it doesn't exist, all TEXT columns
-    var columnDefs = string.Join(", ", sanitizedHeaders.Select(h => $"\"{h}\" TEXT"));
-    var createTableSql = $"CREATE TABLE IF NOT EXISTS \"{tableName}\" ({columnDefs});";
-    using (var createCmd = new NpgsqlCommand(createTableSql, conn))
-    {
-        await createCmd.ExecuteNonQueryAsync();
-    }
-
-    // Re-read the CSV for data import
-    using var dataReader = new StreamReader(filePath);
-    using var csvReader = new CsvReader(dataReader, CultureInfo.InvariantCulture);
-    await csvReader.ReadAsync();
-    csvReader.ReadHeader();
-
-    using var writer = conn.BeginBinaryImport(
-        $"COPY \"{tableName}\" ({string.Join(", ", sanitizedHeaders.Select(h => $"\"{h}\""))}) FROM STDIN (FORMAT BINARY)"
-    );
-
-    while (await csvReader.ReadAsync())
-    {
-        writer.StartRow();
-        foreach (var h in headers)
+        public static async Task Main(string[] args)
         {
-            var val = csvReader.GetField(h);
-            writer.Write(string.IsNullOrWhiteSpace(val) ? null : val, NpgsqlTypes.NpgsqlDbType.Text);
+            //await ProcessFoodDataAsync();
+        }
+
+        private static async Task ProcessFoodDataAsync()
+        {
+            var csvFiles = Directory.GetFiles(DirectoryPath, "*.csv");
+
+            using var connection = new NpgsqlConnection(ConnectionString);
+            await connection.OpenAsync();
+
+            foreach (var filePath in csvFiles)
+            {
+                var tableName = Path.GetFileNameWithoutExtension(filePath).ToLowerInvariant();
+
+                // 1. Read Headers and Sanitize
+                string[] headers;
+                using (var headerReader = new StreamReader(filePath))
+                using (var csvHeaderReader = new CsvReader(headerReader, CultureInfo.InvariantCulture))
+                {
+                    await csvHeaderReader.ReadAsync();
+                    csvHeaderReader.ReadHeader();
+                    headers = csvHeaderReader.HeaderRecord!;
+                }
+                var sanitizedHeaders = headers.Select(SanitizeHeader).ToArray();
+
+                // 2. Create Table If Not Exists
+                var columnDefinitions = string.Join(", ", sanitizedHeaders.Select(h => $"\"{h}\" TEXT"));
+                var createTableSql = $"CREATE TABLE IF NOT EXISTS \"{tableName}\" ({columnDefinitions});";
+                using (var createCommand = new NpgsqlCommand(createTableSql, connection))
+                {
+                    await createCommand.ExecuteNonQueryAsync();
+                }
+
+                // 3. Import Data
+                using var dataReader = new StreamReader(filePath);
+                using var csvDataReader = new CsvReader(dataReader, CultureInfo.InvariantCulture);
+                await csvDataReader.ReadAsync();
+                csvDataReader.ReadHeader();
+
+                using var writer = connection.BeginBinaryImport(
+                    $"COPY \"{tableName}\" ({string.Join(", ", sanitizedHeaders.Select(h => $"\"{h}\""))}) FROM STDIN (FORMAT BINARY)"
+                );
+
+                while (await csvDataReader.ReadAsync())
+                {
+                    writer.StartRow();
+                    foreach (var header in headers)
+                    {
+                        var value = csvDataReader.GetField(header);
+                        await writer.WriteAsync(string.IsNullOrWhiteSpace(value) ? null : value, NpgsqlTypes.NpgsqlDbType.Text);
+                    }
+                }
+                await writer.CompleteAsync();
+
+                Console.WriteLine($"Inserted rows into {tableName}");
+            }
+        }
+
+        private static string SanitizeHeader(string input)
+        {
+            return Regex.Replace(input, "[^a-zA-Z0-9_]", "_");
         }
     }
-
-    await writer.CompleteAsync();
-    Console.WriteLine($"Inserted rows into {tableName}");
-}
-
-string Sanitize(string input)
-{
-    return Regex.Replace(input, "[^a-zA-Z0-9_]", "_");
 }
