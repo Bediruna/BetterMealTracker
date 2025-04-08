@@ -1,5 +1,5 @@
 CREATE TABLE food (
-    food_id INT PRIMARY KEY,
+    id INT PRIMARY KEY,
     name TEXT NOT NULL,
     brand TEXT,
   
@@ -29,7 +29,7 @@ CREATE TABLE food (
 );
 
 CREATE TABLE serving_option (
-    serving_id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY,
     food_id INT NOT NULL REFERENCES food(food_id) ON DELETE CASCADE,
     size_g FLOAT NOT NULL,
     description TEXT NOT NULL,
@@ -37,12 +37,12 @@ CREATE TABLE serving_option (
 );
 
 CREATE TABLE meal_type (
-    meal_type_id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY,
     name TEXT NOT NULL UNIQUE
 );
 
 CREATE TABLE food_log (
-    food_log_id INT PRIMARY KEY,
+    id INT PRIMARY KEY,
     food_id INT REFERENCES food(food_id) ON DELETE CASCADE,
     grams_eaten FLOAT NOT NULL,
     servings_eaten FLOAT,
