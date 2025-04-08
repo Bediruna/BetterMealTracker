@@ -1,77 +1,78 @@
-CREATE TABLE food (
-    id INT PRIMARY KEY,
-    name TEXT NOT NULL,
-    brand TEXT,
-  
-    -- Macronutrients per 100g
-    calories FLOAT,
-    protein_g FLOAT,
-    fat_g FLOAT,
-    saturated_fat_g FLOAT,
-    trans_fat_g FLOAT,
-    carbs_g FLOAT,
-    fiber_g FLOAT,
-    sugar_g FLOAT,
-    added_sugar_g FLOAT,
+CREATE TABLE Food (
+    Id INT PRIMARY KEY,
+    Name TEXT NOT NULL,
+    Brand TEXT,
 
-    -- Micronutrients per 100g
-    cholesterol_mg FLOAT,
-    sodium_mg FLOAT,
-    potassium_mg FLOAT,
-    calcium_mg FLOAT,
-    iron_mg FLOAT,
-    vitamin_a_µg FLOAT,
-    vitamin_c_mg FLOAT,
-    vitamin_d_µg FLOAT,
-    vitamin_b12_µg FLOAT,
-    magnesium_mg FLOAT,
-    zinc_mg FLOAT
+    -- Macronutrients Per 100g
+    Calories FLOAT,
+    ProteinG FLOAT,
+    FatG FLOAT,
+    SaturatedFatG FLOAT,
+    TransFatG FLOAT,
+    CarbsG FLOAT,
+    FiberG FLOAT,
+    SugarG FLOAT,
+    AddedSugarG FLOAT,
+
+    -- Micronutrients Per 100g
+    CholesterolMg FLOAT,
+    SodiumMg FLOAT,
+    PotassiumMg FLOAT,
+    CalciumMg FLOAT,
+    IronMg FLOAT,
+    VitaminAUg FLOAT,
+    VitaminCMg FLOAT,
+    VitaminDUg FLOAT,
+    VitaminB12Ug FLOAT,
+    MagnesiumMg FLOAT,
+    ZincMg FLOAT
 );
 
-CREATE TABLE serving_option (
-    id INTEGER PRIMARY KEY,
-    food_id INT NOT NULL REFERENCES food(food_id) ON DELETE CASCADE,
-    size_g FLOAT NOT NULL,
-    description TEXT NOT NULL,
-    is_default BOOLEAN DEFAULT FALSE
+CREATE TABLE ServingOption (
+    Id INTEGER PRIMARY KEY,
+    FoodId INT NOT NULL REFERENCES Food(Id) ON DELETE CASCADE,
+    SizeG FLOAT NOT NULL,
+    Description TEXT NOT NULL,
+    IsDefault BOOLEAN DEFAULT FALSE
 );
 
-CREATE TABLE meal_type (
-    id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL UNIQUE
+CREATE TABLE MealType (
+    Id INTEGER PRIMARY KEY,
+    Name TEXT NOT NULL UNIQUE
 );
 
-CREATE TABLE food_log (
-    id INT PRIMARY KEY,
-    food_id INT REFERENCES food(food_id) ON DELETE CASCADE,
-    grams_eaten FLOAT NOT NULL,
-    servings_eaten FLOAT,
-    meal_type_id INT REFERENCES meal_type(meal_type_id),
-    date_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    notes TEXT
+CREATE TABLE FoodLog (
+    Id INT PRIMARY KEY,
+    FoodId INT REFERENCES Food(Id) ON DELETE CASCADE,
+    GramsConsumed FLOAT NOT NULL,
+    ServingsConsumed FLOAT,
+    MealTypeId INT REFERENCES MealType(Id),
+    DateConsumed TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    Notes TEXT
 );
 
 CREATE TABLE VisibleOnLogPage (
-    protein BOOLEAN DEFAULT TRUE,
-    calories BOOLEAN DEFAULT TRUE,
-    fat BOOLEAN DEFAULT TRUE,
-    carbs BOOLEAN DEFAULT TRUE,
-    sugar BOOLEAN DEFAULT TRUE,
-    fiber BOOLEAN DEFAULT TRUE,
-    cholesterol BOOLEAN DEFAULT TRUE,
-    sodium BOOLEAN DEFAULT TRUE,
-    potassium BOOLEAN DEFAULT TRUE,
-    calcium BOOLEAN DEFAULT TRUE,
-    iron BOOLEAN DEFAULT TRUE,
-    vitamin_a BOOLEAN DEFAULT TRUE,
-    vitamin_c BOOLEAN DEFAULT TRUE,
-    vitamin_d BOOLEAN DEFAULT TRUE,
-    vitamin_b12 BOOLEAN DEFAULT TRUE,
-    magnesium BOOLEAN DEFAULT TRUE,
-    zinc BOOLEAN DEFAULT TRUE
+    Protein BOOLEAN DEFAULT TRUE,
+    Calories BOOLEAN DEFAULT TRUE,
+    Fat BOOLEAN DEFAULT TRUE,
+    Carbs BOOLEAN DEFAULT TRUE,
+    Sugar BOOLEAN DEFAULT TRUE,
+    Fiber BOOLEAN DEFAULT TRUE,
+    Cholesterol BOOLEAN DEFAULT TRUE,
+    Sodium BOOLEAN DEFAULT TRUE,
+    Potassium BOOLEAN DEFAULT TRUE,
+    Calcium BOOLEAN DEFAULT TRUE,
+    Iron BOOLEAN DEFAULT TRUE,
+    VitaminA BOOLEAN DEFAULT TRUE,
+    VitaminC BOOLEAN DEFAULT TRUE,
+    VitaminD BOOLEAN DEFAULT TRUE,
+    VitaminB12 BOOLEAN DEFAULT TRUE,
+    Magnesium BOOLEAN DEFAULT TRUE,
+    Zinc BOOLEAN DEFAULT TRUE
 );
+
 CREATE TABLE VisibleOnMainPage(
     MealTypes BOOLEAN DEFAULT TRUE, -- or just show all food logs on the page
     MacrosChart BOOLEAN DEFAULT TRUE,
     Summary BOOLEAN DEFAULT TRUE
-)
+);

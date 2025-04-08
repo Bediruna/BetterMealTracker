@@ -24,4 +24,7 @@ public class Food : BaseModel
     public float? VitaminB12µg { get; set; }
     public float? MagnesiumMg { get; set; }
     public float? ZincMg { get; set; }
+
+    //public ICollection<ServingOption> ServingOptions { get; set; } = new List<ServingOption>();
+    //public ICollection<FoodLog> FoodLogs { get; set; } = new List<FoodLog>();
 }

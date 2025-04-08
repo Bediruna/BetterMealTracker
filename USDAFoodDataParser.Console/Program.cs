@@ -8,7 +8,7 @@ namespace FoodDataImporter
     public class Program
     {
         private static readonly string DirectoryPath = @"C:\Users\bedir\Downloads\FoodData";
-        private static readonly string ConnectionString =
+        private static readonly string USDAFoodDataConStr =
             Environment.GetEnvironmentVariable("PG_usdafooddata_CONN_STRING")
             ?? throw new InvalidOperationException("PG_usdafooddata_CONN_STRING not set");
 
@@ -21,7 +21,7 @@ namespace FoodDataImporter
         {
             var csvFiles = Directory.GetFiles(DirectoryPath, "*.csv");
 
-            using var connection = new NpgsqlConnection(ConnectionString);
+            using var connection = new NpgsqlConnection(USDAFoodDataConStr);
             await connection.OpenAsync();
 
             foreach (var filePath in csvFiles)
