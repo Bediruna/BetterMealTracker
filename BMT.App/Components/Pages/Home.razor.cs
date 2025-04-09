@@ -9,9 +9,6 @@ public partial class Home : ComponentBase
     [Inject]
     private DataService _dataService { get; set; }
 
-    [Inject]
-    private NavigationManager NavigationManager { get; set; }
-
     private List<FoodLog> logs = [];
 
     protected override async Task OnInitializedAsync()
@@ -61,10 +58,5 @@ public partial class Home : ComponentBase
     {
         _dataService.SelectedDate = _dataService.SelectedDate.AddDays(1);
         logs = await _dataService.GetLogsForSelectedDate();
-    }
-
-    private void NavigateToExercise(int exerciseId)
-    {
-        NavigationManager.NavigateTo($"/traininglog/{exerciseId}");
     }
 }
