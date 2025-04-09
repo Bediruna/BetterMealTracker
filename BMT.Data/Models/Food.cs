@@ -2,7 +2,7 @@ namespace BMT.Data.Models;
 
 public class Food : BaseModel
 {
-    public required string Name { get; set; }
+    public string Name { get; set; }
     public string? Brand { get; set; }
     public float? Calories { get; set; }
     public float? ProteinG { get; set; }
