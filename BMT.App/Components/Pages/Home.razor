@@ -14,11 +14,7 @@
 
     foreach (var group in groupedLogs)
     {
-        <div class="card m-3" @onclick="() => NavigateToExercise(group.Key)">
-            <div class="card-body">
-                <h3 class="card-title">@group.First().MealTypeId</h3>
-            </div>
-        </div>
+        
     }
     <div class="d-flex flex-row align-items-center justify-content-center pb-3">
         <NavLink class="btn btn-primary" href="categories">+ Add New Exercise</NavLink>

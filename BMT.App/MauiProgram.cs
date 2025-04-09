@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using BMT.App.Services;
+using Microsoft.Extensions.Logging;
 
 namespace BMT.App
 {
@@ -16,8 +17,9 @@ namespace BMT.App
 
             builder.Services.AddMauiBlazorWebView();
 
+            builder.Services.AddSingleton<DataService>();
 #if DEBUG
-    		builder.Services.AddBlazorWebViewDeveloperTools();
+            builder.Services.AddBlazorWebViewDeveloperTools();
     		builder.Logging.AddDebug();
 #endif
 

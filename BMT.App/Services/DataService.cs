@@ -1,7 +1,7 @@
 ﻿using BMT.Data.Models;
 using SQLite;
-
 namespace BMT.App.Services;
+
 public class DataService
 {
     public SQLiteAsyncConnection db;
