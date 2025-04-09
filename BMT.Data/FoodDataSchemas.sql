@@ -1,5 +1,4 @@
-
-CREATE TABLE public.branded_food (
+CREATE TABLE branded_food (
     fdc_id text,
     brand_owner text,
     brand_name text,
@@ -23,26 +22,12 @@ CREATE TABLE public.branded_food (
     material_code text
 );
 
-
-ALTER TABLE public.branded_food OWNER TO postgres;
-
---
--- Name: fndds_derivation; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.fndds_derivation (
+CREATE TABLE fndds_derivation (
     derivation_code text,
     derivation_description text
 );
 
-
-ALTER TABLE public.fndds_derivation OWNER TO postgres;
-
---
--- Name: fndds_ingredient_nutrient_value; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.fndds_ingredient_nutrient_value (
+CREATE TABLE fndds_ingredient_nutrient_value (
     ingredient_code text,
     "Ingredient_description" text,
     "Nutrient_code" text,
@@ -56,14 +41,7 @@ CREATE TABLE public.fndds_ingredient_nutrient_value (
     "End_date" text
 );
 
-
-ALTER TABLE public.fndds_ingredient_nutrient_value OWNER TO postgres;
-
---
--- Name: food; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.food (
+CREATE TABLE food (
     fdc_id text,
     data_type text,
     description text,
@@ -71,14 +49,7 @@ CREATE TABLE public.food (
     publication_date text
 );
 
-
-ALTER TABLE public.food OWNER TO postgres;
-
---
--- Name: food_attribute; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.food_attribute (
+CREATE TABLE food_attribute (
     id text,
     fdc_id text,
     seq_num text,
@@ -87,54 +58,26 @@ CREATE TABLE public.food_attribute (
     value text
 );
 
-
-ALTER TABLE public.food_attribute OWNER TO postgres;
-
---
--- Name: food_attribute_type; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.food_attribute_type (
+CREATE TABLE food_attribute_type (
     id text,
     name text,
     description text
 );
 
-
-ALTER TABLE public.food_attribute_type OWNER TO postgres;
-
---
--- Name: food_calorie_conversion_factor; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.food_calorie_conversion_factor (
+CREATE TABLE food_calorie_conversion_factor (
     food_nutrient_conversion_factor_id text,
     protein_value text,
     fat_value text,
     carbohydrate_value text
 );
 
-
-ALTER TABLE public.food_calorie_conversion_factor OWNER TO postgres;
-
---
--- Name: food_category; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.food_category (
+CREATE TABLE food_category (
     id text,
     code text,
     description text
 );
 
-
-ALTER TABLE public.food_category OWNER TO postgres;
-
---
--- Name: food_component; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.food_component (
+CREATE TABLE food_component (
     id text,
     fdc_id text,
     name text,
@@ -145,14 +88,7 @@ CREATE TABLE public.food_component (
     min_year_acquired text
 );
 
-
-ALTER TABLE public.food_component OWNER TO postgres;
-
---
--- Name: food_nutrient; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.food_nutrient (
+CREATE TABLE food_nutrient (
     id text,
     fdc_id text,
     nutrient_id text,
@@ -168,52 +104,24 @@ CREATE TABLE public.food_nutrient (
     percent_daily_value text
 );
 
-
-ALTER TABLE public.food_nutrient OWNER TO postgres;
-
---
--- Name: food_nutrient_conversion_factor; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.food_nutrient_conversion_factor (
+CREATE TABLE food_nutrient_conversion_factor (
     id text,
     fdc_id text
 );
 
-
-ALTER TABLE public.food_nutrient_conversion_factor OWNER TO postgres;
-
---
--- Name: food_nutrient_derivation; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.food_nutrient_derivation (
+CREATE TABLE food_nutrient_derivation (
     id text,
     code text,
     description text
 );
 
-
-ALTER TABLE public.food_nutrient_derivation OWNER TO postgres;
-
---
--- Name: food_nutrient_source; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.food_nutrient_source (
+CREATE TABLE food_nutrient_source (
     id text,
     code text,
     description text
 );
 
-
-ALTER TABLE public.food_nutrient_source OWNER TO postgres;
-
---
--- Name: food_portion; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.food_portion (
+CREATE TABLE food_portion (
     id text,
     fdc_id text,
     seq_num text,
@@ -227,52 +135,24 @@ CREATE TABLE public.food_portion (
     min_year_acquired text
 );
 
-
-ALTER TABLE public.food_portion OWNER TO postgres;
-
---
--- Name: food_protein_conversion_factor; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.food_protein_conversion_factor (
+CREATE TABLE food_protein_conversion_factor (
     food_nutrient_conversion_factor_id text,
     value text
 );
 
-
-ALTER TABLE public.food_protein_conversion_factor OWNER TO postgres;
-
---
--- Name: food_update_log_entry; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.food_update_log_entry (
+CREATE TABLE food_update_log_entry (
     id text,
     description text,
     last_updated text
 );
 
-
-ALTER TABLE public.food_update_log_entry OWNER TO postgres;
-
---
--- Name: foundation_food; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.foundation_food (
+CREATE TABLE foundation_food (
     fdc_id text,
     "NDB_number" text,
     footnote text
 );
 
-
-ALTER TABLE public.foundation_food OWNER TO postgres;
-
---
--- Name: input_food; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.input_food (
+CREATE TABLE input_food (
     id text,
     fdc_id text,
     fdc_id_of_input_food text,
@@ -287,51 +167,23 @@ CREATE TABLE public.input_food (
     retention_code text
 );
 
-
-ALTER TABLE public.input_food OWNER TO postgres;
-
---
--- Name: lab_method; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.lab_method (
+CREATE TABLE lab_method (
     id text,
     description text,
     technique text
 );
 
-
-ALTER TABLE public.lab_method OWNER TO postgres;
-
---
--- Name: lab_method_code; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.lab_method_code (
+CREATE TABLE lab_method_code (
     lab_method_id text,
     code text
 );
 
-
-ALTER TABLE public.lab_method_code OWNER TO postgres;
-
---
--- Name: lab_method_nutrient; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.lab_method_nutrient (
+CREATE TABLE lab_method_nutrient (
     lab_method_id text,
     nutrient_id text
 );
 
-
-ALTER TABLE public.lab_method_nutrient OWNER TO postgres;
-
---
--- Name: market_acquisition; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.market_acquisition (
+CREATE TABLE market_acquisition (
     fdc_id text,
     brand_description text,
     expiration_date text,
@@ -347,26 +199,12 @@ CREATE TABLE public.market_acquisition (
     upc_code text
 );
 
-
-ALTER TABLE public.market_acquisition OWNER TO postgres;
-
---
--- Name: measure_unit; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.measure_unit (
+CREATE TABLE measure_unit (
     id text,
     name text
 );
 
-
-ALTER TABLE public.measure_unit OWNER TO postgres;
-
---
--- Name: microbe; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.microbe (
+CREATE TABLE microbe (
     id text,
     "foodId" text,
     method text,
@@ -376,14 +214,7 @@ CREATE TABLE public.microbe (
     uom text
 );
 
-
-ALTER TABLE public.microbe OWNER TO postgres;
-
---
--- Name: nutrient; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.nutrient (
+CREATE TABLE nutrient (
     id text,
     name text,
     unit_name text,
@@ -391,77 +222,35 @@ CREATE TABLE public.nutrient (
     rank text
 );
 
-
-ALTER TABLE public.nutrient OWNER TO postgres;
-
---
--- Name: retention_factor; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.retention_factor (
+CREATE TABLE retention_factor (
     n_gid text,
     n_code text,
     "n_foodGroupId" text,
     n_description text
 );
 
-
-ALTER TABLE public.retention_factor OWNER TO postgres;
-
---
--- Name: sample_food; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.sample_food (
+CREATE TABLE sample_food (
     fdc_id text
 );
 
-
-ALTER TABLE public.sample_food OWNER TO postgres;
-
---
--- Name: sr_legacy_food; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.sr_legacy_food (
+CREATE TABLE sr_legacy_food (
     fdc_id text,
     "NDB_number" text
 );
 
-
-ALTER TABLE public.sr_legacy_food OWNER TO postgres;
-
---
--- Name: sub_sample_food; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.sub_sample_food (
+CREATE TABLE sub_sample_food (
     fdc_id text,
     fdc_id_of_sample_food text
 );
 
-
-ALTER TABLE public.sub_sample_food OWNER TO postgres;
-
---
--- Name: sub_sample_result; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.sub_sample_result (
+CREATE TABLE sub_sample_result (
     food_nutrient_id text,
     adjusted_amount text,
     lab_method_id text,
     nutrient_name text
 );
 
-
-ALTER TABLE public.sub_sample_result OWNER TO postgres;
-
---
--- Name: survey_fndds_food; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.survey_fndds_food (
+CREATE TABLE survey_fndds_food (
     fdc_id text,
     food_code text,
     wweia_category_code text,
@@ -469,22 +258,7 @@ CREATE TABLE public.survey_fndds_food (
     end_date text
 );
 
-
-ALTER TABLE public.survey_fndds_food OWNER TO postgres;
-
---
--- Name: wweia_food_category; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.wweia_food_category (
+CREATE TABLE wweia_food_category (
     wweia_food_category text,
     wweia_food_category_description text
 );
-
-
-ALTER TABLE public.wweia_food_category OWNER TO postgres;
-
---
--- PostgreSQL database dump complete
---
-

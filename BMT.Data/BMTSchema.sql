@@ -1,37 +1,37 @@
-CREATE TABLE Food (
-    Id INT PRIMARY KEY,
+CREATE TABLE better_Food (
+    Id INTEGER PRIMARY KEY,
     Name TEXT NOT NULL,
     Brand TEXT,
 
     -- Macronutrients Per 100g
-    Calories FLOAT,
-    ProteinG FLOAT,
-    FatG FLOAT,
-    SaturatedFatG FLOAT,
-    TransFatG FLOAT,
-    CarbsG FLOAT,
-    FiberG FLOAT,
-    SugarG FLOAT,
-    AddedSugarG FLOAT,
+    Calories REAL,     
+    ProteinG REAL,     
+    FatG REAL,         
+    SaturatedFatG REAL,
+    TransFatG REAL,    
+    CarbsG REAL,       
+    FiberG REAL,       
+    SugarG REAL,       
+    AddedSugarG REAL,  
 
     -- Micronutrients Per 100g
-    CholesterolMg FLOAT,
-    SodiumMg FLOAT,
-    PotassiumMg FLOAT,
-    CalciumMg FLOAT,
-    IronMg FLOAT,
-    VitaminAUg FLOAT,
-    VitaminCMg FLOAT,
-    VitaminDUg FLOAT,
-    VitaminB12Ug FLOAT,
-    MagnesiumMg FLOAT,
-    ZincMg FLOAT
+    CholesterolMg REAL,
+    SodiumMg REAL,     
+    PotassiumMg REAL,  
+    CalciumMg REAL,    
+    IronMg REAL,       
+    VitaminAUg REAL,   
+    VitaminCMg REAL,   
+    VitaminDUg REAL,   
+    VitaminB12Ug REAL, 
+    MagnesiumMg REAL,  
+    ZincMg REAL       
 );
 
-CREATE TABLE ServingOption (
+CREATE TABLE better_ServingOption (
     Id INTEGER PRIMARY KEY,
-    FoodId INT NOT NULL REFERENCES Food(Id) ON DELETE CASCADE,
-    SizeG FLOAT NOT NULL,
+    FoodId INT NOT NULL REFERENCES better_Food(Id) ON DELETE CASCADE,
+    SizeG REAL NOT NULL,     
     Description TEXT NOT NULL,
     IsDefault BOOLEAN DEFAULT FALSE
 );

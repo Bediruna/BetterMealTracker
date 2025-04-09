@@ -23,6 +23,7 @@ partial class Program
         await connection.OpenAsync();
 
         await CreateTableForClassAsync<Food>(connection);
+        await CreateTableForClassAsync<ServingOption>(connection);
 
         Console.WriteLine("Database table creation completed.");
     }
