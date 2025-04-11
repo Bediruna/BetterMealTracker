@@ -5,6 +5,7 @@ public static class OFFDataTools
 {
     const string databaseName = "off";
     const string collectionName = "products";
+    const int PageSize = 10;
 
     private static bool ShouldPrintValue(BsonDocument document, string fieldName)
     {
@@ -16,6 +17,51 @@ public static class OFFDataTools
         if (value.IsInt32) return value.AsInt32 != 0;
         if (value.IsInt64) return value.AsInt64 != 0;
         return false;
+    }
+
+    public static async Task CreateIndexes()
+    {
+        var client = new MongoClient();
+        var database = client.GetDatabase(databaseName);
+        var collection = database.GetCollection<BsonDocument>(collectionName);
+        
+        // List existing indexes
+        var indexes = await collection.Indexes.ListAsync();
+        var indexList = await indexes.ToListAsync();
+        
+        Console.WriteLine($"Current number of indexes: {indexList.Count}");
+        Console.WriteLine("Existing indexes:");
+        foreach (var index in indexList)
+        {
+            Console.WriteLine($"- {index["name"]}");
+        }
+
+        // Check if text index already exists
+        var textIndexExists = indexList.Any(index => 
+            index.Contains("key") && 
+            index["key"].AsBsonDocument.Contains("_fts") && 
+            index["key"]["_fts"].AsString == "text");
+
+        if (textIndexExists)
+        {
+            Console.WriteLine("Text index on product_name already exists.");
+            return;
+        }
+
+        try
+        {
+            // Create text index on product_name for faster text searches
+            var indexKeys = Builders<BsonDocument>.IndexKeys.Text("product_name");
+            await collection.Indexes.CreateOneAsync(new CreateIndexModel<BsonDocument>(indexKeys));
+            Console.WriteLine("Text index created successfully!");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error creating index: {ex.Message}");
+            Console.WriteLine("\nTo create a new index, you may need to:");
+            Console.WriteLine("1. Drop an existing unused index");
+            Console.WriteLine("2. Or increase the index limit in your MongoDB configuration");
+        }
     }
 
     public async static Task PrintValues(string documentJson)
@@ -61,14 +107,14 @@ public static class OFFDataTools
         }
     }
 
-    public async static Task SearchProducts(string searchTerm)
+    public async static Task SearchProductsLimited(string searchTerm, int limit = 5)
     {
         var client = new MongoClient();
         var database = client.GetDatabase(databaseName);
         var collection = database.GetCollection<BsonDocument>(collectionName);
 
         var filter = Builders<BsonDocument>.Filter.Regex("product_name", new BsonRegularExpression(searchTerm, "i"));
-        var products = await collection.Find(filter).Limit(5).ToListAsync();
+        var products = await collection.Find(filter).Limit(limit).ToListAsync();
 
         if (products.Count > 0)
         {
@@ -78,6 +124,45 @@ public static class OFFDataTools
             {
                 Console.WriteLine("----------------------------------------");
                 await PrintValues(product.ToJson());
+            }
+        }
+        else
+        {
+            Console.WriteLine($"No products found matching '{searchTerm}'");
+        }
+    }
+
+    public async static Task SearchProductsPaginated(string searchTerm, int page = 1)
+    {
+        var client = new MongoClient();
+        var database = client.GetDatabase(databaseName);
+        var collection = database.GetCollection<BsonDocument>(collectionName);
+
+        var filter = Builders<BsonDocument>.Filter.Regex("product_name", new BsonRegularExpression(searchTerm, "i"));
+        
+        // Get total count for pagination
+        var totalCount = await collection.CountDocumentsAsync(filter);
+        var totalPages = (int)Math.Ceiling((double)totalCount / PageSize);
+        
+        // Apply pagination
+        var products = await collection.Find(filter)
+            .Skip((page - 1) * PageSize)
+            .Limit(PageSize)
+            .ToListAsync();
+
+        if (products.Count > 0)
+        {
+            Console.WriteLine($"Found {totalCount} products matching '{searchTerm}' (Page {page} of {totalPages}):\n");
+            
+            foreach (var product in products)
+            {
+                Console.WriteLine("----------------------------------------");
+                await PrintValues(product.ToJson());
+            }
+            
+            if (page < totalPages)
+            {
+                Console.WriteLine($"\nThere are more results. Use page {page + 1} to see more.");
             }
         }
         else
