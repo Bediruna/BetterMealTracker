@@ -6,11 +6,15 @@ using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
-namespace FoodDataImporter;
-
 class USDAFoodDataTools
 {
-    static async Task ProcessFoodDataAsync(string DirectoryPath, string USDAFoodDataConStr)
+
+    public static readonly string DirectoryPath = @"C:\Users\bedir\Documents\FoodData";
+    static readonly string USDAFoodDataConStr =
+        Environment.GetEnvironmentVariable("PG_usdafooddata_CONN_STRING")
+        ?? throw new InvalidOperationException("PG_usdafooddata_CONN_STRING not set");
+
+    static async Task ProcessFoodDataAsync()
     {
         var csvFiles = Directory.GetFiles(DirectoryPath, "*.csv");
 
@@ -71,7 +75,7 @@ class USDAFoodDataTools
     }
 
 
-    static async Task CreateDatabaseTables(string USDAFoodDataConStr)
+    static async Task CreateDatabaseTables()
     {
         using var connection = new NpgsqlConnection(USDAFoodDataConStr);
         await connection.OpenAsync();
