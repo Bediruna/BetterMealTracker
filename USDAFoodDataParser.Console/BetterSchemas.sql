@@ -3,6 +3,9 @@ CREATE TABLE better_food
     id integer NOT NULL,
     name text NOT NULL,
     brand text,
+    ingredients TEXT,
+
+    -- Macronutrients Per 100g
     calories real,
     proteing real,
     fatg real,
@@ -12,6 +15,8 @@ CREATE TABLE better_food
     fiberg real,
     sugarg real,
     addedsugarg real,
+    
+    -- Micronutrients Per 100g
     cholesterolmg real,
     sodiummg real,
     potassiummg real,
@@ -23,7 +28,6 @@ CREATE TABLE better_food
     vitaminb12ug real,
     magnesiummg real,
     zincmg real,
-    CONSTRAINT better_food_pkey PRIMARY KEY (id)
 );
 
 CREATE TABLE better_servingoption

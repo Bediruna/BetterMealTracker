@@ -4,6 +4,7 @@ public class Food : BaseModel
 {
     public string Name { get; set; }
     public string Brand { get; set; }
+    public string Ingredients { get; set; }
     public double Calories { get; set; }
     public double ProteinG { get; set; }
     public double FatG { get; set; }
