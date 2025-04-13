@@ -1,2 +1,1 @@
-﻿//await OFFDataTools.SearchProductsPaginated("banana");
-await OFFDataTools.SearchProductsLimited("banana");
+﻿await OFFDataTools.SearchProductsLimited("",1000);
