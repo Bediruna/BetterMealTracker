@@ -1,4 +1,4 @@
-﻿using MongoDB.Bson;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using SQLite;
 
@@ -25,10 +25,10 @@ public static class OFFDataTools
         var product = new OffDetails();
 
         // Simple fields
-        if (ValidValue(document, "id")) product.OffId = document["id"].AsString;
-        if (ValidValue(document, "product_name")) product.ProductName = document["product_name"].AsString;
-        if (ValidValue(document, "brands")) product.Brands = document["brands"].AsString;
-        if (ValidValue(document, "ingredients_text")) product.Ingredients = document["ingredients_text"].AsString;
+        if (ValidValue(document, "_id")) product.OffId = document["_id"].ToString();
+        if (ValidValue(document, "product_name")) product.ProductName = document["product_name"].ToString();
+        if (ValidValue(document, "brands")) product.Brands = document["brands"].ToString();
+        if (ValidValue(document, "ingredients_text")) product.Ingredients = document["ingredients_text"].ToString();
 
         if (document.Contains("nutriments"))
         {
@@ -60,12 +60,12 @@ public static class OFFDataTools
             product.VitaminB12ug = GetDouble("vitamin-b12_100g");
         }
 
-        if (ValidValue(document, "quantity")) product.Quantity = document["quantity"].AsString;
+        if (ValidValue(document, "quantity")) product.Quantity = document["quantity"].ToString();
         if (ValidValue(document, "product_quantity")) product.ProductQuantity = Convert.ToDouble(document["product_quantity"]);
-        if (ValidValue(document, "product_quantity_unit")) product.ProductQuantityUnit = document["product_quantity_unit"].AsString;
-        if (ValidValue(document, "serving_size")) product.ServingSize = document["serving_size"].AsString;
+        if (ValidValue(document, "product_quantity_unit")) product.ProductQuantityUnit = document["product_quantity_unit"].ToString();
+        if (ValidValue(document, "serving_size")) product.ServingSize = document["serving_size"].ToString();
         if (ValidValue(document, "serving_quantity")) product.ServingQuantity = Convert.ToDouble(document["serving_quantity"]);
-        if (ValidValue(document, "serving_quantity_unit")) product.ServingQuantityUnit = document["serving_quantity_unit"].AsString;
+        if (ValidValue(document, "serving_quantity_unit")) product.ServingQuantityUnit = document["serving_quantity_unit"].ToString();
 
         return product;
     }
@@ -79,50 +79,31 @@ public static class OFFDataTools
             var collection = database.GetCollection<BsonDocument>(collectionName);
             var dbPath = Path.Combine(@"C:\Users\bedir\Downloads", "off.db");
 
-            // Define batch size
             const int batchSize = 1000;
-
-            // Get the last processed ID from SQLite
-            string lastProcessedId = null;
-
             var db = new SQLiteAsyncConnection(dbPath);
             await db.CreateTableAsync<OffDetails>();
 
-            var lastProduct = await db.Table<OffDetails>()
-                              .OrderByDescending(p => p.OffId)
-                              .FirstOrDefaultAsync();
-
-            if (lastProduct != null)
-            {
-                lastProcessedId = lastProduct.OffId;
-                var count = await db.Table<OffDetails>().CountAsync();
-                Console.WriteLine($"Resuming from previous run. Already processed: {count} documents");
-            }
-
-            // Initialize variables for batching
-            long processedCount = 0;
-            long skippedCount = 0;
             bool hasMoreData = true;
+            // Get the last added OffId from the SQLite database
+            var lastRecord = await db.Table<OffDetails>()
+                .OrderByDescending(x => x.Id)
+                .FirstOrDefaultAsync();
+            string lastId = lastRecord?.OffId ?? "";
 
-            // Use SortBy to ensure consistent pagination
-            var sort = Builders<BsonDocument>.Sort.Ascending("id");
+            int totalAdded = 0;
 
             while (hasMoreData)
             {
-                // Build filter for the next batch
-                var filter = Builders<BsonDocument>.Filter.Empty;
-                if (!string.IsNullOrEmpty(lastProcessedId))
-                {
-                    // Using the correct field name "id" from your mapper
-                    filter = Builders<BsonDocument>.Filter.Gt("id", lastProcessedId);
-                }
+                var filter = string.IsNullOrEmpty(lastId)
+                    ? Builders<BsonDocument>.Filter.Empty
+                    : Builders<BsonDocument>.Filter.Gt("_id", lastId);
 
-                // Get the next batch
-                var batchCursor = collection.Find(filter)
-                                          .Sort(sort)
-                                          .Limit(batchSize);
+                var sort = Builders<BsonDocument>.Sort.Ascending("_id");
 
-                var batch = await batchCursor.ToListAsync();
+                var batch = await collection.Find(filter)
+                                            .Sort(sort)
+                                            .Limit(batchSize)
+                                            .ToListAsync();
 
                 if (batch.Count == 0)
                 {
@@ -130,40 +111,41 @@ public static class OFFDataTools
                     continue;
                 }
 
-                // Process this batch, filtering out products with no name
                 var productsToStore = batch.Select(p => MapToProductInfo(p))
-                                          .Where(p => !string.IsNullOrWhiteSpace(p.ProductName))
-                                          .ToList();
-
-                skippedCount += (batch.Count - productsToStore.Count);
+                                           .Where(p => !string.IsNullOrWhiteSpace(p.ProductName))
+                                           .ToList();
 
                 if (productsToStore.Count > 0)
                 {
-                    await db.RunInTransactionAsync(conn =>
+                    var offIds = productsToStore.Select(p => p.OffId).ToList();
+                    var existing = await db.Table<OffDetails>()
+                        .Where(x => offIds.Contains(x.OffId))
+                        .ToListAsync();
+                    var existingIds = new HashSet<string>(existing.Select(x => x.OffId));
+                    var newProducts = productsToStore.Where(p => !existingIds.Contains(p.OffId)).ToList();
+
+                    if (newProducts.Count > 0)
                     {
-                        conn.InsertAll(productsToStore);
-                    });
-
-                }
-
-                // Keep track of progress
-                processedCount += productsToStore.Count;
-                Console.WriteLine($"Processed {processedCount} documents, skipped {skippedCount} without product names");
-
-                // Update the last processed ID using the actual field name
-                if (batch.Last().Contains("id"))
-                {
-                    lastProcessedId = batch.Last()["if"].AsString;
+                        await db.RunInTransactionAsync(conn =>
+                        {
+                            conn.InsertAll(newProducts);
+                        });
+                        totalAdded += newProducts.Count;
+                        Console.WriteLine($"Added {newProducts.Count} products in this batch. Total added so far: {totalAdded}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"No new products to add in this batch. Total added so far: {totalAdded}");
+                    }
                 }
                 else
                 {
-                    Console.WriteLine("Warning: Document doesn't contain 'id' field");
-                    hasMoreData = false;
+                    Console.WriteLine($"No valid products to store in this batch. Total added so far: {totalAdded}");
                 }
-            }
 
-            Console.WriteLine($"Completed processing {processedCount} documents");
-            Console.WriteLine($"Skipped {skippedCount} documents with no product name");
+                lastId = batch.Last()["_id"].ToString();
+            }
+            Console.WriteLine($"Finished! Total new products added: {totalAdded}");
         }
         catch (Exception ex)
         {

@@ -1,4 +1,4 @@
-﻿using SQLite;
+using SQLite;
 
 public class OffDetails
 {
@@ -41,4 +41,12 @@ public class OffDetails
     public string ServingSize { get; set; }
     public double? ServingQuantity { get; set; }
     public string ServingQuantityUnit { get; set; }
+
+    // Creation date
+    public DateTime CreateDate { get; set; }
+
+    public OffDetails()
+    {
+        CreateDate = DateTime.Now;
+    }
 }
