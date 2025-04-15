@@ -3,8 +3,8 @@
 public class OffDetails
 {
     // Basic info
-    [PrimaryKey]
-    public string Id { get; set; }
+    [PrimaryKey, AutoIncrement]
+    public int Id { get; set; }
     public string OffId { get; set; }
     public string ProductName { get; set; }
     public string Brands { get; set; }

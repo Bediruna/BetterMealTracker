@@ -1,1 +1,1 @@
-﻿await OFFDataTools.SearchProductsLimited("",1000);
+﻿await OFFDataTools.SaveProductsToDb();

@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
+using SQLite;
 
 public static class OFFDataTools
 {
@@ -17,78 +18,6 @@ public static class OFFDataTools
         if (value.IsInt64) return value.AsInt64 != 0;
 
         return false;
-    }
-
-    static void PrintValue(BsonDocument document, string fieldName, string label = "", string suffix = "")
-    {
-        if (!ValidValue(document, fieldName)) return;
-        if (string.IsNullOrEmpty(label)) label = fieldName;
-
-        var value = document[fieldName];
-        string output;
-
-        if (value.IsDouble || value.IsDecimal128 || value.IsInt32 || value.IsInt64)
-        {
-            output = Math.Round(Convert.ToDouble(value), 2).ToString("0.##");
-        }
-        else
-        {
-            output = value.ToString();
-        }
-
-        Console.WriteLine($"{label}: {output}{suffix}");
-    }
-
-
-    public async static Task PrintValues(string documentJson)
-    {
-        var document = BsonDocument.Parse(documentJson);
-
-        Console.WriteLine("----------------------------------------");
-
-        PrintValue(document, "id");
-        PrintValue(document, "product_name", "Product Name");
-        PrintValue(document, "brands", "Brands");
-        PrintValue(document, "ingredients_text", "Ingredients");
-
-        if (document.Contains("nutriments"))
-        {
-            var n = document["nutriments"].AsBsonDocument;
-
-            PrintValue(n, "energy-kcal_100g", "Calories");
-            PrintValue(n, "proteins_100g", "Protein");
-            PrintValue(n, "fat_100g", "Fat");
-            PrintValue(n, "saturated-fat_100g", "Saturated Fat");
-            PrintValue(n, "trans-fat_100g", "TransFatG", "g");
-            PrintValue(n, "carbohydrates_100g", "CarbsG", "g");
-            PrintValue(n, "fiber_100g", "FiberG", "g");
-            PrintValue(n, "sugars_100g", "SugarG", "g");
-            PrintValue(n, "added-sugars_100g", "AddedSugarG", "g");
-
-            PrintValue(n, "cholesterol_100g", "CholesterolMg", "mg");
-            PrintValue(n, "sodium_100g", "SodiumMg", "g");
-            PrintValue(n, "potassium_100g", "PotassiumMg", "mg");
-            PrintValue(n, "calcium_100g", "CalciumMg", "mg");
-            PrintValue(n, "iron_100g", "IronMg", "mg");
-            PrintValue(n, "magnesium_100g", "MagnesiumMg", "mg");
-            PrintValue(n, "zinc_100g", "ZincMg", "mg");
-
-            PrintValue(n, "vitamin-a_100g", "VitaminAug", "µg");
-            PrintValue(n, "vitamin-c_100g", "VitaminCMg", "mg");
-            PrintValue(n, "vitamin-d_100g", "VitaminDug", "µg");
-            PrintValue(n, "vitamin-b12_100g", "VitaminB12ug", "µg");
-
-            PrintValue(document, "quantity");
-            PrintValue(document, "product_quantity");
-            PrintValue(document, "product_quantity_unit");
-            PrintValue(document, "serving_size");
-            PrintValue(document, "serving_quantity");
-            PrintValue(document, "serving_quantity_unit");
-        }
-        else
-        {
-            Console.WriteLine("No nutriments found in document");
-        }
     }
 
     public static OffDetails MapToProductInfo(BsonDocument document)
@@ -141,43 +70,105 @@ public static class OFFDataTools
         return product;
     }
 
-
-    public async static Task SearchProductsLimited(string searchTerm, int limit = 5)
+    public async static Task SaveProductsToDb()
     {
-        var productsToStore = new List<OffDetails>();
         try
         {
             var client = new MongoClient();
-
             var database = client.GetDatabase(databaseName);
             var collection = database.GetCollection<BsonDocument>(collectionName);
+            var dbPath = Path.Combine(@"C:\Users\bedir\Downloads", "off.db");
 
-            var regex = new BsonRegularExpression(searchTerm, "i");
+            // Define batch size
+            const int batchSize = 1000;
 
-            var filter = Builders<BsonDocument>.Filter.Or(
-                Builders<BsonDocument>.Filter.Regex("product_name", regex),
-                Builders<BsonDocument>.Filter.Regex("brands", regex)
-            );
+            // Get the last processed ID from SQLite
+            string lastProcessedId = null;
 
-            var products = await collection.Find(filter)
-                .Limit(limit)
-                .ToListAsync();
+            var db = new SQLiteAsyncConnection(dbPath);
+            await db.CreateTableAsync<OffDetails>();
 
-            Console.WriteLine($"Found {products.Count} products matching '{searchTerm}':\n");
+            var lastProduct = await db.Table<OffDetails>()
+                              .OrderByDescending(p => p.OffId)
+                              .FirstOrDefaultAsync();
 
-            foreach (var product in products)
+            if (lastProduct != null)
             {
-                await PrintValues(product.ToJson(new MongoDB.Bson.IO.JsonWriterSettings { Indent = true }));
-                var details = MapToProductInfo(product);
-                productsToStore.Add(details);
+                lastProcessedId = lastProduct.OffId;
+                var count = await db.Table<OffDetails>().CountAsync();
+                Console.WriteLine($"Resuming from previous run. Already processed: {count} documents");
             }
 
+            // Initialize variables for batching
+            long processedCount = 0;
+            long skippedCount = 0;
+            bool hasMoreData = true;
 
+            // Use SortBy to ensure consistent pagination
+            var sort = Builders<BsonDocument>.Sort.Ascending("id");
+
+            while (hasMoreData)
+            {
+                // Build filter for the next batch
+                var filter = Builders<BsonDocument>.Filter.Empty;
+                if (!string.IsNullOrEmpty(lastProcessedId))
+                {
+                    // Using the correct field name "id" from your mapper
+                    filter = Builders<BsonDocument>.Filter.Gt("id", lastProcessedId);
+                }
+
+                // Get the next batch
+                var batchCursor = collection.Find(filter)
+                                          .Sort(sort)
+                                          .Limit(batchSize);
+
+                var batch = await batchCursor.ToListAsync();
+
+                if (batch.Count == 0)
+                {
+                    hasMoreData = false;
+                    continue;
+                }
+
+                // Process this batch, filtering out products with no name
+                var productsToStore = batch.Select(p => MapToProductInfo(p))
+                                          .Where(p => !string.IsNullOrWhiteSpace(p.ProductName))
+                                          .ToList();
+
+                skippedCount += (batch.Count - productsToStore.Count);
+
+                if (productsToStore.Count > 0)
+                {
+                    await db.RunInTransactionAsync(conn =>
+                    {
+                        conn.InsertAll(productsToStore);
+                    });
+
+                }
+
+                // Keep track of progress
+                processedCount += productsToStore.Count;
+                Console.WriteLine($"Processed {processedCount} documents, skipped {skippedCount} without product names");
+
+                // Update the last processed ID using the actual field name
+                if (batch.Last().Contains("id"))
+                {
+                    lastProcessedId = batch.Last()["if"].AsString;
+                }
+                else
+                {
+                    Console.WriteLine("Warning: Document doesn't contain 'id' field");
+                    hasMoreData = false;
+                }
+            }
+
+            Console.WriteLine($"Completed processing {processedCount} documents");
+            Console.WriteLine($"Skipped {skippedCount} documents with no product name");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"An unexpected error occurred: {ex.Message}");
+            Console.WriteLine($"Database save error: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
         }
     }
-
 }
