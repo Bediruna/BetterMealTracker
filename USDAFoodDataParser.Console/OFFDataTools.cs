@@ -79,7 +79,7 @@ public static class OFFDataTools
             var collection = database.GetCollection<BsonDocument>(collectionName);
             var dbPath = Path.Combine(@"C:\Users\bedir\Downloads", "off.db");
 
-            const int batchSize = 1000;
+            const int batchSize = 20000;
             var db = new SQLiteAsyncConnection(dbPath);
             await db.CreateTableAsync<OffDetails>();
 
