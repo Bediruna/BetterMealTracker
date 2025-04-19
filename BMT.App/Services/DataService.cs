@@ -12,7 +12,11 @@ public class DataService
     {
         try
         {
-            Task.Run(InitializeDatabase).Wait();
+            Task.Run(async () =>
+            {
+                await CopyDatabaseIfNotExists();
+                await InitializeDatabase();
+            }).Wait();
         }
         catch (Exception ex)
         {
@@ -31,7 +35,6 @@ public class DataService
                 await db.CreateTableAsync<Food>();
                 await db.CreateTableAsync<FoodLog>();
                 await db.CreateTableAsync<MealType>();
-                await db.CreateTableAsync<ServingOption>();
                 await db.CreateTableAsync<VisibleOnLogPage>();
                 await db.CreateTableAsync<VisibleOnMainPage>();
                 await db.CreateTableAsync<ErrorLog>();                
@@ -171,6 +174,32 @@ public class DataService
         catch (Exception ex)
         {
             Console.WriteLine("Failed to log error because: " + ex.ToString());
+        }
+    }
+    private async Task CopyDatabaseIfNotExists()
+    {
+        var destinationPath = Path.Combine(FileSystem.AppDataDirectory, "off.db");
+
+        if (!File.Exists(destinationPath))
+        {
+            using var stream = await FileSystem.OpenAppPackageFileAsync("off.db");
+            using var destinationStream = File.Create(destinationPath);
+            await stream.CopyToAsync(destinationStream);
+        }
+
+        Constants.DatabasePath = destinationPath; // Update the database path
+    }
+    public async Task<List<Food>> SearchFoods(string query)
+    {
+        try
+        {
+            string sqlQuery = $"SELECT * FROM Food WHERE Name LIKE '%{query}%'";
+            return await db.QueryAsync<Food>(sqlQuery);
+        }
+        catch (Exception ex)
+        {
+            await LogError(ex);
+            return new List<Food>();
         }
     }
 }

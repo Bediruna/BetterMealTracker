@@ -12,6 +12,17 @@ public static class Constants
         // enable multi-threaded database access
         SQLite.SQLiteOpenFlags.SharedCache;
 
-    public static string DatabasePath =>
-        Path.Combine(FileSystem.AppDataDirectory, DatabaseFilename);
+    private static string _databasePath = Path.Combine(FileSystem.AppDataDirectory, DatabaseFilename);
+
+    public static string DatabasePath
+    {
+        get => _databasePath;
+        set
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                _databasePath = value;
+            }
+        }
+    }
 }
