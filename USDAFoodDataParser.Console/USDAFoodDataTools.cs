@@ -81,7 +81,7 @@ class USDAFoodDataTools
         await connection.OpenAsync();
 
         await CreateTableForClassAsync<Food>(connection);
-        await CreateTableForClassAsync<ServingOption>(connection);
+        //await CreateTableForClassAsync<ServingOption>(connection);
 
         Console.WriteLine("Database table creation completed.");
     }

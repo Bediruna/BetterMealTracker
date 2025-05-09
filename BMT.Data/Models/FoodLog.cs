@@ -2,7 +2,7 @@ namespace BMT.Data.Models;
 
 public class FoodLog : BaseModel
 {
-    public int? FoodId { get; set; }
+    public int FoodId { get; set; }
 
     public float GramsConsumed { get; set; }
     public float ServingsConsumed { get; set; }

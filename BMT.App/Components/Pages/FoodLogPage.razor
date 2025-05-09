@@ -1,13 +1,35 @@
 ﻿@page "/foodlog"
-@layout BMT.App.Components.Layout.BlankLayout
 
-<div class="food-log-page">
+<div class="container">
     <h1>Food Log</h1>
 
     <!-- Search Bar -->
     <div class="search-bar">
         <input type="text" @bind="SearchQuery" placeholder="Search for food..." />
         <button @onclick="PerformSearch">Search</button>
+    </div>
+
+    <!-- Add New Food Button -->
+    <div>
+        <button @onclick="NavigateToAddFoodPage">+ Add New Food</button>
+    </div>
+
+    <!-- Recently Used Foods -->
+    <div class="recent-foods">
+        <h2>Recently Used Foods</h2>
+        @if (RecentFoods.Any())
+        {
+                <ul>
+                @foreach (var food in RecentFoods)
+                {
+                            <li>@food.ProductName</li>
+                }
+                </ul>
+        }
+        else
+        {
+                <p>No recently used foods found.</p>
+        }
     </div>
 
     <!-- Search Results -->
@@ -17,7 +39,7 @@
             <ul>
                 @foreach (var food in SearchResults)
                 {
-                    <li>@food.Name</li>
+                    <li>@food.ProductName</li>
                 }
             </ul>
         }

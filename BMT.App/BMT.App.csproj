@@ -71,4 +71,8 @@
       <ProjectReference Include="..\BMT.Data\BMT.Data.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Components\Icons\" />
+    </ItemGroup>
+
 </Project>

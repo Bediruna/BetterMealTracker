@@ -48,7 +48,7 @@ public class DataService
         }
     }
 
-    public async Task<List<FoodLog>> GetAllLogs()
+    public async Task<List<FoodLog>> GetAllFoods()
     {
         try
         {
@@ -84,12 +84,12 @@ public class DataService
         }
     }
 
-    public async Task<List<FoodLog>> GetLogsForExercise(int exerciseId)
+    public async Task<List<FoodLog>> GetLogsForFood(int foodId)
     {
         try
         {
             var results = await db.Table<FoodLog>()
-                                  .Where(log => log.FoodId == exerciseId)
+                                  .Where(log => log.FoodId == foodId)
                                   .OrderByDescending(log => log.DateConsumed)
                                   .ToListAsync();
 
@@ -102,7 +102,7 @@ public class DataService
         }
     }
 
-    public async Task<List<FoodLog>> GetLogsForExerciseAndSelectedDate(int exerciseId)
+    public async Task<List<FoodLog>> GetLogsForFoodAndSelectedDate(int foodId)
     {
         try
         {
@@ -110,7 +110,7 @@ public class DataService
             var nextDay = startDate.AddDays(1);
 
             var results = await db.Table<FoodLog>()
-                                  .Where(log => log.FoodId == exerciseId &&
+                                  .Where(log => log.FoodId == foodId &&
                                                 log.DateConsumed >= startDate &&
                                                 log.DateConsumed < nextDay)
                                   .OrderByDescending(log => log.DateConsumed)
@@ -125,31 +125,31 @@ public class DataService
         }
     }
 
-    public async Task<List<FoodLog>> DeleteExerciseAndReturnUpdatedLogs(FoodLog exerciseToDelete)
+    public async Task<List<FoodLog>> DeleteFoodAndReturnUpdatedLogs(FoodLog foodToDelete)
     {
         var updatedLogsForTheDay = new List<FoodLog>();
         try
         {
             // Define the date range of interest
-            var dateOfExercise = exerciseToDelete.DateConsumed;
+            var dateOfFood = foodToDelete.DateConsumed;
 
-            // Delete the exercise
-            await db.DeleteAsync(exerciseToDelete);
+            // Delete the food
+            await db.DeleteAsync(foodToDelete);
 
-            // Retrieve and update the OrderInDay for remaining exercises on the same day
-            var exercisesForTheDay = await GetLogsForExerciseAndSelectedDate(exerciseToDelete.Id);
+            // Retrieve and update the OrderInDay for remaining foods on the same day
+            var foodsForTheDay = await GetLogsForFoodAndSelectedDate(foodToDelete.Id);
 
             int updatedOrder = 1; // Start reordering from 1
-            foreach (var exercise in exercisesForTheDay)
+            foreach (var food in foodsForTheDay)
             {
-                if (exercise.Id != exerciseToDelete.Id) // Skip the deleted exercise (if it's still in the list due to async timing)
+                if (food.Id != foodToDelete.Id) // Skip the deleted food (if it's still in the list due to async timing)
                 {
-                    await db.UpdateAsync(exercise);
+                    await db.UpdateAsync(food);
                 }
             }
 
             // Retrieve the updated list of logs for that day
-            updatedLogsForTheDay = await GetLogsForExerciseAndSelectedDate(exerciseToDelete.Id);
+            updatedLogsForTheDay = await GetLogsForFoodAndSelectedDate(foodToDelete.Id);
         }
         catch (Exception ex)
         {
@@ -202,4 +202,21 @@ public class DataService
             return new List<Food>();
         }
     }
+
+    public async Task<List<Food>> GetMostRecentlyUsedFoods(int count)
+    {
+        try
+        {
+            return await db.Table<Food>()
+                           .OrderByDescending(food => food.LastUsedDate)
+                           .Take(count)
+                           .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            await LogError(ex);
+            return new List<Food>();
+        }
+    }
+
 }

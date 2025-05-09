@@ -1,0 +1,38 @@
+﻿@page "/addfood"
+@using BMT.Data.Models
+
+<div class="container">
+    <h1>Add New Food</h1>
+
+    <EditForm Model="NewFood" OnValidSubmit="HandleValidSubmit">
+        <div>
+            <label>Product Name:</label>
+            <input type="text" @bind="NewFood.ProductName" />
+        </div>
+        <div>
+            <label>Calories:</label>
+            <input type="number" @bind="NewFood.Calories" />
+        </div>
+        <div>
+            <label>Protein (g):</label>
+            <input type="number" @bind="NewFood.Protein" />
+        </div>
+        <div>
+            <label>Fat (g):</label>
+            <input type="number" @bind="NewFood.Fat" />
+        </div>
+        <div>
+            <label>Carbs (g):</label>
+            <input type="number" @bind="NewFood.Carbs" />
+        </div>
+        <div>
+            <label>Sugar (g):</label>
+            <input type="number" @bind="NewFood.Sugar" />
+        </div>
+        <div>
+            <label>Serving Size:</label>
+            <input type="text" @bind="NewFood.ServingSize" />
+        </div>
+        <button type="submit">Save</button>
+    </EditForm>
+</div>

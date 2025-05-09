@@ -8,9 +8,18 @@ public partial class FoodLogPage : ComponentBase
     [Inject]
     private DataService dataService { get; set; }
 
+    [Inject]
+    private NavigationManager NavigationManager { get; set; }
+
     private string SearchQuery { get; set; } = string.Empty;
     private List<Food> SearchResults { get; set; } = new();
+    private List<Food> RecentFoods { get; set; } = new();
     private string errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRecentFoods();
+    }
 
     private async Task PerformSearch()
     {
@@ -29,5 +38,16 @@ public partial class FoodLogPage : ComponentBase
         {
             errorMessage = $"An error occurred while searching: {ex.Message}";
         }
+    }
+
+    private void NavigateToAddFoodPage()
+    {
+        // Navigate to the Add Food page
+        NavigationManager.NavigateTo("/addfood");
+    }
+
+    private async Task LoadRecentFoods()
+    {
+        RecentFoods = await dataService.GetMostRecentlyUsedFoods(10);
     }
 }
